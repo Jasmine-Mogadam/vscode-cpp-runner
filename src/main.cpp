@@ -1,7 +1,11 @@
-#include "Greeter.hpp"
-
-int main() {
-    Greeter greeter("World");
-    greeter.sayHello();
-    return 0;
+#include <iostream>
+#include "Header1.h"
+#include "Header2.h"
+int main()
+{
+std:: cout << "Hello World! \ n" ;
+setMyFunc ( HighLevelFun );
+setMyFunc2(HighLevelFun2);
+SomeLowLevelFunc ();
+return 0;
 }
