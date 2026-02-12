@@ -1,3 +1,4 @@
 *.plist
 *.dSYM
 .DS_Store
+obj/
