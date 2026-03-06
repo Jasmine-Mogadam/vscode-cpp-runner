@@ -9,42 +9,95 @@
 using ::testing::_;
 using ::testing::Return;
 
-// 5. Create a “mock” object for ItemService.h
 class MockItemService : public ItemService
 {
 public:
     MOCK_METHOD(double, getPrice, (Item & item), (override));
 };
 
-// 7. Use SetUp() and TearDown() in TestFixture
 class CartTest : public ::testing::Test
 {
 protected:
+    std::vector<Item> items;
+    MockItemService mockItemService;
+    double totalAmount;
+
+    // Also adds expect call for the getPrice function on the mocked service
+    void addExpectedCartItem(Item item, double price)
+    {
+        items.push_back(item);
+        EXPECT_CALL(mockItemService, getPrice(item)).WillOnce(Return(price));
+        totalAmount += price * item.getQuantity();
+    }
+
     void SetUp() override
     {
         std::cout << "SetUp: Preparing the test environment..." << std::endl;
+        totalAmount = 0.0;
     }
 
     void TearDown() override
     {
-        std::cout << "TearDown: Cleaning up after the test..." << std::endl;
+        std::cout << "TearDown: Cleaning up after test..." << std::endl;
+        items.clear();
     }
 };
 
-TEST_F(CartTest, GetCartTotalAmount)
+// handles no items (returns 0)
+TEST_F(CartTest, GetCartNoItems)
 {
-    // 4. Create items and add items to the Cart
-    Item SDcard("1", "SDcard", 1);
-    Item LEDlight("2", "LEDlight", 1);
-    Item DashCam("3", "DashCam", 2);
-    std::vector<Item> items = {SDcard, LEDlight, DashCam};
+    Cart cart;
+    cart.setItemService(&mockItemService);
 
-    // YOUR TASK:
-    // - Instantiate MockItemService
-    // - Set expectations (make it return a price for each item)
-    // - Instantiate Cart, set the service and items
-    // - 6. Check that getCartTotalAmount method returns correct output (use “EXPECT_EQ”)
+    EXPECT_EQ(cart.getCartTotalAmount(), 0);
+}
 
-    // Example expectation:
-    // EXPECT_CALL(mockService, getPrice(_)).WillRepeatedly(Return(10.0));
+// handles null service (returns 0)
+TEST_F(CartTest, GetCartNullPointerService)
+{
+    items.push_back(Item("1", "SDcard", 1));
+
+    Cart cart;
+    cart.setItemService(nullptr);
+    cart.setItems(items);
+
+    EXPECT_EQ(cart.getCartTotalAmount(), 0);
+}
+
+// handles 1 item
+TEST_F(CartTest, GetCartOneItemTotalAmount)
+{
+    addExpectedCartItem(Item("1", "SDcard", 1), 10.0);
+
+    Cart cart;
+    cart.setItemService(&mockItemService);
+    cart.setItems(items);
+
+    EXPECT_EQ(cart.getCartTotalAmount(), totalAmount);
+}
+
+// handles multiple items
+TEST_F(CartTest, GetCartMultipleItemsTotalAmount)
+{
+    addExpectedCartItem(Item("1", "SDcard", 1), 10.0);
+    addExpectedCartItem(Item("2", "LEDlight", 1), 20.0);
+    addExpectedCartItem(Item("3", "DashCam", 2), 30.0);
+
+    Cart cart;
+    cart.setItemService(&mockItemService);
+    cart.setItems(items);
+
+    EXPECT_EQ(cart.getCartTotalAmount(), totalAmount);
+}
+
+// handles 1 item with 2 quantity
+TEST_F(CartTest, GetCartOneItemTwoQuantityTotalAmount)
+{
+    addExpectedCartItem(Item("1", "SDcard", 2), 10.0);
+
+    Cart cart;
+    cart.setItemService(&mockItemService);
+    cart.setItems(items);
+
+    EXPECT_EQ(cart.getCartTotalAmount(), totalAmount);
 }

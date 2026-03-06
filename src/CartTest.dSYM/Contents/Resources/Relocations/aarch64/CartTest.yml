@@ -1,0 +1,5 @@
+---
+triple:          'arm64-apple-darwin'
+binary-path:     '/Users/jazmo/Documents/GitHub/cpp-runner/src/CartTest'
+relocations:     []
+...
